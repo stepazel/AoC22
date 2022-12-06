@@ -17,14 +17,16 @@ while True:
     if not line:
         break
 
-    count = int(line[5])
-    source_stack = int(line[12])
-    target_stack = int(line[17])
+    digits = [int(s) for s in line.split() if s.isdigit()]
+    count = digits[0]
+    source_stack = digits[1]
+    target_stack = digits[2]
 
-    # for i in range(storage[4].count(), )
+    end_items = storage[source_stack][-count:]
+    # end_items.reverse() for the first part
+    del storage[source_stack][-count:]
 
-    print('hmm')
+    storage[target_stack].extend(end_items)
 
+print(storage)
 
-# Presouvam je z konce na konec po jednom, tj. tak jak to zapisuji je dobre (to pismenko, oc je nahore, je konec)
-# Tj. presouvam vzdycky horni (posledni)
