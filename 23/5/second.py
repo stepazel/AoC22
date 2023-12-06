@@ -1,6 +1,6 @@
 import re
-
-text = open('test.txt', 'r')
+# MAP the ranges instead of the inputs
+text = open('input', 'r')
 
 ranges = {
     'seed-to-soil': [],
