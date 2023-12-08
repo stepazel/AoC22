@@ -1,5 +1,5 @@
 import re
-# MAP the ranges instead of the inputs
+
 text = open('input', 'r')
 
 ranges = {
@@ -12,6 +12,41 @@ ranges = {
     'humidity-to-location': []
 }
 map_keys = list(ranges.keys())
+
+
+def get_location_number(source_number: int, key_position=0):
+    destination_number = source_number
+    key_name = map_keys[key_position]
+
+    for range in ranges[key_name]:
+        if range[0][0] <= source_number <= range[0][1]:
+            print(
+                f'Source number {source_number} belongs to a range <{range[0][0]}; {range[0][1]}>. Adding offset {range[2]}')
+            destination_number = source_number + range[2]  # range[2] is the offset
+
+    if key_name == 'humidity-to-location':
+        print(f'{source_number:,} => {destination_number:,}  |  {key_position}. {key_name}')
+        return destination_number
+    print(f'{source_number:,} => {destination_number:,}  |  {key_position}. {key_name}\n')
+    return get_location_number(destination_number, key_position + 1)
+
+
+def get_seed_number(source_number: int, key_position=6, log=False):  # start from the end
+    destination_number = source_number
+    key_name = map_keys[key_position]
+    # range[0] is source, range[1] is destination, but right now it is VICEVERSA!
+    for range in ranges[key_name]:
+        source_range = range[1]
+        if source_range[0] <= source_number <= source_range[1]:
+            destination_number = source_number - range[2]
+
+    if key_name == 'seed-to-soil':
+        if log:
+            print(f'{source_number:,} => {destination_number:,}  |  {key_position}. {key_name}')
+        return destination_number
+    if log:
+        print(f'{source_number:,} => {destination_number:,}  |  {key_position}. {key_name}\n')
+    return get_seed_number(destination_number, key_position - 1, log=log)
 
 
 def num_there(string):
@@ -28,6 +63,8 @@ seeds = get_numbers_from_line(first_line)  # ignore
 seed_initial_ranges = []
 for i in range(0, len(seeds), 2):
     seed_initial_ranges.append((seeds[i], seeds[i] + seeds[i + 1] - 1))
+
+seed_initial_ranges.sort()
 
 while True:
     line = text.readline()
@@ -53,39 +90,6 @@ while True:
                 offset
             ])
 
-print(seed_initial_ranges)
-for name, rangea in ranges.items():
-    for range in rangea:
-        print(f'{name}: {range[0]}; {range[1]}; {range[2]}')
-
-
-def get_seed_number(source_number: int, key_position=6): # start from the end
-    destination_number = source_number
-    key_name = map_keys[key_position]
-    # print(f'\nStart - {key_name}: {destination_number}')
-    # range[0] is source, range[1] is destination, but right now it is VICEVERSA!
-    for range in ranges[key_name]:
-        source_range = range[1]
-        # print(f'Source range: {source_range}')
-        if source_range[0] < source_number < source_range[1]:
-            destination_number = source_number - range[2]
-            # print(f'{key_name}; {destination_number}')
-            break
-
-    if key_name == 'seed-to-soil':
-        return destination_number
-    return get_seed_number(destination_number, key_position - 1)
-
-# Go other way around:
-# 1. Find the smallest (possible) location number,
-# 2. Find the corresponding seed number (through the map)
-# 3. Check if that seed number is possible. If not, repeat.
-# only for test data
-# assert get_seed_number(82) == 79
-# assert get_seed_number(43) == 14
-# assert get_seed_number(86) == 55
-# assert get_seed_number(35) == 13
-# the answer is lower than 8_816_546
 location_number = 0
 count = 0
 while True:
@@ -95,9 +99,6 @@ while True:
     for range in seed_initial_ranges:
         if range[0] <= seed_number <= range[1]:
             count += 1
-            print(f'{seed_number}; {location_number}')
-            if count == 50:
-                raise Exception(f'hmm')
-            # print(location_number)
-            # raise Exception(f'Found')
+            print(location_number)
+            raise Exception(f'Found it.')
     location_number += 1
